@@ -1,3 +1,9 @@
+---
+services: batch, storage
+platforms: dotnet
+author: dlepow
+---
+
 # Batch Python File Processing with ffmpeg
 
 A Python application that uses Batch to process media files in parallel with the [ffmpeg](http://ffmpeg.org/) open-source tool. 
