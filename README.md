@@ -1,6 +1,6 @@
 ---
 services: batch, storage
-platforms: dotnet
+platforms: python
 author: dlepow
 ---
 
