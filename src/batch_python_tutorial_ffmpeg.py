@@ -1,4 +1,4 @@
-# Companion project to the following article:
+# Companion script to the following article:
 # https://docs.microsoft.com/azure/batch/tutorial-parallel-python
 
 
@@ -30,8 +30,7 @@ sys.path.append('..')
 # global
 _BATCH_ACCOUNT_NAME =''
 _BATCH_ACCOUNT_KEY = ''
-_BATCH_ACCOUNT_URL = ''
-
+_BATCH_ACCOUNT_URL = 'https://danlep0110.westus2.batch.azure.com'
 _STORAGE_ACCOUNT_NAME = ''
 _STORAGE_ACCOUNT_KEY = ''
 _POOL_ID = 'LinuxFfmpegPool'
@@ -39,7 +38,6 @@ _DEDICATED_POOL_NODE_COUNT = 0
 _LOW_PRIORITY_POOL_NODE_COUNT = 5
 _POOL_VM_SIZE = 'STANDARD_A1_v2'
 _JOB_ID = 'LinuxFfmpegJob'
-
 
 
 def query_yes_no(question, default="yes"):
@@ -208,20 +206,15 @@ def create_pool(batch_service_client, pool_id):
         target_dedicated_nodes=_DEDICATED_POOL_NODE_COUNT,
         target_low_priority_nodes=_LOW_PRIORITY_POOL_NODE_COUNT,
         start_task=batchmodels.StartTask(
-            command_line="/bin/bash -c \"add-apt-repository -y ppa:djcj/hybrid && apt-get update && apt-get install -y ffmpeg\"",
+            command_line="/bin/bash -c \"apt-get update && apt-get install -y ffmpeg\"",
             wait_for_success=True,
             user_identity=batchmodels.UserIdentity(
                 auto_user=batchmodels.AutoUserSpecification(
                 scope=batchmodels.AutoUserScope.pool,
                 elevation_level=batchmodels.ElevationLevel.admin)),
          )
-  )
-    try:
-        batch_service_client.pool.add(new_pool)
-    except batchmodels.batch_error.BatchErrorException as err:
-        print_batch_exception(err)
-        raise
-
+    )
+    batch_service_client.pool.add(new_pool)
 
 def create_job(batch_service_client, job_id, pool_id):
     """
@@ -238,13 +231,8 @@ def create_job(batch_service_client, job_id, pool_id):
         job_id,
         batch.models.PoolInformation(pool_id=pool_id))
 
-    try:
-        batch_service_client.job.add(job)
-    except batchmodels.batch_error.BatchErrorException as err:
-        print_batch_exception(err)
-        raise
-
-
+    batch_service_client.job.add(job)
+    
 def add_tasks(batch_service_client, job_id, input_files, output_container_sas_url):
     """
     Adds a task for each input file in the collection to the specified job.
@@ -263,7 +251,6 @@ def add_tasks(batch_service_client, job_id, input_files, output_container_sas_ur
     tasks = list()
 
     for idx, input_file in enumerate(input_files): 
-
         input_file_path=input_file.file_path
         output_file_path="".join((input_file_path).split('.')[:-1]) + '.mp3'
         command = "/bin/bash -c \"ffmpeg -i {} {} \"".format(input_file_path, output_file_path)
@@ -371,24 +358,29 @@ if __name__ == '__main__':
         credentials,
         base_url=_BATCH_ACCOUNT_URL)
 
-    # Create the pool that will contain the compute nodes that will execute the
-    # tasks. 
-    create_pool(batch_client, _POOL_ID)
+    try:
+        # Create the pool that will contain the compute nodes that will execute the
+        # tasks.
+        create_pool(batch_client, _POOL_ID)
+        
+        # Create the job that will run the tasks.
+        create_job(batch_client, _JOB_ID, _POOL_ID)
 
-    # Create the job that will run the tasks.
-    create_job(batch_client, _JOB_ID, _POOL_ID)
+        # Add the tasks to the job. Pass the input files and a SAS URL 
+        # to the storage container for output files.
+        add_tasks(batch_client, _JOB_ID, input_files, output_container_sas_url)
 
-    # Add the tasks to the job. 
-    add_tasks(batch_client, _JOB_ID, input_files, output_container_sas_url)
-
-    # Pause execution until tasks reach Completed state.
-    wait_for_tasks_to_complete(batch_client,
+        # Pause execution until tasks reach Completed state.
+        wait_for_tasks_to_complete(batch_client,
                                _JOB_ID,
                                datetime.timedelta(minutes=30))
 
-    print("Success! All tasks completed successfully within the "
+        print("  Success! All tasks reached the 'Completed' state within the "
           "specified timeout period.")
 
+    except batchmodels.batch_error.BatchErrorException as err:
+            print_batch_exception(err)
+            raise
 
     # Delete input container in storage
     print('Deleting container [{}]...'.format(input_container_name))
