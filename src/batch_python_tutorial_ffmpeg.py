@@ -30,7 +30,7 @@ sys.path.append('..')
 # global
 _BATCH_ACCOUNT_NAME =''
 _BATCH_ACCOUNT_KEY = ''
-_BATCH_ACCOUNT_URL = 'https://danlep0110.westus2.batch.azure.com'
+_BATCH_ACCOUNT_URL = ''
 _STORAGE_ACCOUNT_NAME = ''
 _STORAGE_ACCOUNT_KEY = ''
 _POOL_ID = 'LinuxFfmpegPool'
