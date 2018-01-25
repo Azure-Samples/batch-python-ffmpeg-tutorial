@@ -1,7 +1,3 @@
-# Companion script to the following article:
-# https://docs.microsoft.com/azure/batch/tutorial-parallel-python
-
-
 from __future__ import print_function
 import datetime
 import io
