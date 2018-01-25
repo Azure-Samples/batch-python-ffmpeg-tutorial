@@ -8,8 +8,6 @@ author: dlepow
 
 A Python application that uses Batch to process media files in parallel with the [ffmpeg](http://ffmpeg.org/) open-source tool. 
 
-For details and explanation, see the accompanying article [Process media files in parallel with Azure Batch using the Python API](https://docs.microsoft.com/azure/batch/tutorial-parallel-python).
-
 ## Prerequisites
 
 - Azure Batch account and linked general-purpose Azure Storage account
@@ -18,7 +16,7 @@ For details and explanation, see the accompanying article [Process media files i
 ## Resources
 
 - [Azure Batch documentation](https://docs.microsoft.com/azure/batch/)
-- [Azure Batch and HPC code samples](https://github.com/Azure/azure-batch-samples)
+- [Azure Batch code samples](https://github.com/Azure/azure-batch-samples)
 
 ## Project code of conduct
 
