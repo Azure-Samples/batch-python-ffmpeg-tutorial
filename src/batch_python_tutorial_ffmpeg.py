@@ -210,6 +210,7 @@ def create_pool(batch_service_client, pool_id):
                 elevation_level=batchmodels.ElevationLevel.admin)),
          )
     )
+
     batch_service_client.pool.add(new_pool)
 
 def create_job(batch_service_client, job_id, pool_id):
@@ -224,8 +225,8 @@ def create_job(batch_service_client, job_id, pool_id):
     print('Creating job [{}]...'.format(job_id))
 
     job = batch.models.JobAddParameter(
-        job_id,
-        batch.models.PoolInformation(pool_id=pool_id))
+        id=job_id,
+        pool_info=batch.models.PoolInformation(pool_id=pool_id))
 
     batch_service_client.job.add(job)
     
@@ -254,11 +255,13 @@ def add_tasks(batch_service_client, job_id, input_files, output_container_sas_ur
             id='Task{}'.format(idx),
             command_line=command,
             resource_files=[input_file],
-            output_files=[batchmodels.OutputFile(output_file_path,
+            output_files=[batchmodels.OutputFile(
+                      file_pattern=output_file_path,
                       destination=batchmodels.OutputFileDestination(
-                        container=batchmodels.OutputFileBlobContainerDestination(output_container_sas_url)),
+                        container=batchmodels.OutputFileBlobContainerDestination(
+                            container_url=output_container_sas_url)),
                       upload_options=batchmodels.OutputFileUploadOptions(
-                        batchmodels.OutputFileUploadCondition.task_success))]
+                        upload_condition=batchmodels.OutputFileUploadCondition.task_success))]
             )
      )
     batch_service_client.task.add_collection(job_id, tasks)
@@ -327,7 +330,7 @@ if __name__ == '__main__':
     # Create a list of all MP4 files in the InputFiles directory. 
     input_file_paths = []
     
-    for folder, subs, files in os.walk('./InputFiles/'):
+    for folder, subs, files in os.walk(os.path.join(sys.path[0],'InputFiles')):
         for filename in files:
             if filename.endswith(".mp4"):
                 input_file_paths.append(os.path.abspath(os.path.join(folder, filename)))
@@ -374,7 +377,7 @@ if __name__ == '__main__':
         print("  Success! All tasks reached the 'Completed' state within the "
           "specified timeout period.")
 
-    except batchmodels.batch_error.BatchErrorException as err:
+    except batchmodels.BatchErrorException as err:
             print_batch_exception(err)
             raise
 
