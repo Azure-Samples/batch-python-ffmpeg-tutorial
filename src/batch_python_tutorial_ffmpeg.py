@@ -194,10 +194,10 @@ def create_pool(batch_service_client, pool_id):
             image_reference=batchmodels.ImageReference(
         	    publisher="Canonical",
         	    offer="UbuntuServer",
-        	    sku="16.04-LTS",
+        	    sku="18.04-LTS",
         	    version="latest"
                 ),
-            node_agent_sku_id="batch.node.ubuntu 16.04"),
+            node_agent_sku_id="batch.node.ubuntu 18.04"),
         vm_size=_POOL_VM_SIZE,
         target_dedicated_nodes=_DEDICATED_POOL_NODE_COUNT,
         target_low_priority_nodes=_LOW_PRIORITY_POOL_NODE_COUNT,
