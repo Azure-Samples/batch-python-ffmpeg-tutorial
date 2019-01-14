@@ -4,6 +4,7 @@ import io
 import os
 import sys
 import time
+import config
 
 try:
     input = raw_input
@@ -18,23 +19,9 @@ import azure.batch.models as batchmodels
 sys.path.append('.')
 sys.path.append('..')
 
-
-# Update the Batch and Storage account credential strings below with the values
+# Update the Batch and Storage account credential strings in config.py with values
 # unique to your accounts. These are used when constructing connection strings
 # for the Batch and Storage client objects.
-
-# global
-_BATCH_ACCOUNT_NAME =''
-_BATCH_ACCOUNT_KEY = ''
-_BATCH_ACCOUNT_URL = ''
-_STORAGE_ACCOUNT_NAME = ''
-_STORAGE_ACCOUNT_KEY = ''
-_POOL_ID = 'LinuxFfmpegPool'
-_DEDICATED_POOL_NODE_COUNT = 0
-_LOW_PRIORITY_POOL_NODE_COUNT = 5
-_POOL_VM_SIZE = 'STANDARD_A1_v2'
-_JOB_ID = 'LinuxFfmpegJob'
-
 
 def query_yes_no(question, default="yes"):
     """
@@ -116,7 +103,7 @@ def upload_file_to_container(block_blob_client, container_name, file_path):
                                               sas_token=sas_token)
 
     return batchmodels.ResourceFile(file_path=blob_name,
-                                    blob_source=sas_url)
+                                    http_url=sas_url)
 
 def get_container_sas_token(block_blob_client,
                             container_name, blob_permissions):
@@ -162,7 +149,7 @@ def get_container_sas_url(block_blob_client,
                             container_name, azureblob.BlobPermissions.WRITE)
 
     # Construct SAS URL for the container
-    container_sas_url = "https://{}.blob.core.windows.net/{}?{}".format(_STORAGE_ACCOUNT_NAME, container_name, sas_token)
+    container_sas_url = "https://{}.blob.core.windows.net/{}?{}".format(config._STORAGE_ACCOUNT_NAME, container_name, sas_token)
 
     return container_sas_url
 
@@ -198,9 +185,9 @@ def create_pool(batch_service_client, pool_id):
         	    version="latest"
                 ),
             node_agent_sku_id="batch.node.ubuntu 18.04"),
-        vm_size=_POOL_VM_SIZE,
-        target_dedicated_nodes=_DEDICATED_POOL_NODE_COUNT,
-        target_low_priority_nodes=_LOW_PRIORITY_POOL_NODE_COUNT,
+        vm_size=config._POOL_VM_SIZE,
+        target_dedicated_nodes=config._DEDICATED_POOL_NODE_COUNT,
+        target_low_priority_nodes=config._LOW_PRIORITY_POOL_NODE_COUNT,
         start_task=batchmodels.StartTask(
             command_line="/bin/bash -c \"apt-get update && apt-get install -y ffmpeg\"",
             wait_for_success=True,
@@ -314,8 +301,8 @@ if __name__ == '__main__':
 
     
     blob_client = azureblob.BlockBlobService(
-        account_name=_STORAGE_ACCOUNT_NAME,
-        account_key=_STORAGE_ACCOUNT_KEY)
+        account_name=config._STORAGE_ACCOUNT_NAME,
+        account_key=config._STORAGE_ACCOUNT_KEY)
 
     # Use the blob client to create the containers in Azure Storage if they
     # don't yet exist.
@@ -350,29 +337,29 @@ if __name__ == '__main__':
 
     # Create a Batch service client. We'll now be interacting with the Batch
     # service in addition to Storage
-    credentials = batchauth.SharedKeyCredentials(_BATCH_ACCOUNT_NAME,
-                                                 _BATCH_ACCOUNT_KEY)
+    credentials = batchauth.SharedKeyCredentials(config._BATCH_ACCOUNT_NAME,
+                                                 config._BATCH_ACCOUNT_KEY)
 
     batch_client = batch.BatchServiceClient(
         credentials,
-        base_url=_BATCH_ACCOUNT_URL)
+        batch_url=config._BATCH_ACCOUNT_URL)
 
     try:
         # Create the pool that will contain the compute nodes that will execute the
         # tasks.
-        create_pool(batch_client, _POOL_ID)
+        create_pool(batch_client, config._POOL_ID)
         
         # Create the job that will run the tasks.
-        create_job(batch_client, _JOB_ID, _POOL_ID)
+        create_job(batch_client, config._JOB_ID, config._POOL_ID)
 
         # Add the tasks to the job. Pass the input files and a SAS URL 
         # to the storage container for output files.
-        add_tasks(batch_client, _JOB_ID, input_files, output_container_sas_url)
+        add_tasks(batch_client, config._JOB_ID, input_files, output_container_sas_url)
 
         # Pause execution until tasks reach Completed state.
         wait_for_tasks_to_complete(batch_client,
-                               _JOB_ID,
-                               datetime.timedelta(minutes=30))
+                                   config._JOB_ID,
+                                   datetime.timedelta(minutes=30))
 
         print("  Success! All tasks reached the 'Completed' state within the "
           "specified timeout period.")
@@ -395,10 +382,10 @@ if __name__ == '__main__':
 
     # Clean up Batch resources (if the user so chooses).
     if query_yes_no('Delete job?') == 'yes':
-        batch_client.job.delete(_JOB_ID)
+        batch_client.job.delete(config._JOB_ID)
 
     if query_yes_no('Delete pool?') == 'yes':
-        batch_client.pool.delete(_POOL_ID)
+        batch_client.pool.delete(config._POOL_ID)
 
     print()
     input('Press ENTER to exit...')
