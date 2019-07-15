@@ -1,7 +1,10 @@
 ---
-services: batch, storage
-platforms: python
-author: dlepow
+page_type: sample
+description: "A Python application that uses Batch to process media files in parallel with the ffmpeg open-source tool."
+languages:
+- python
+products:
+- azure
 ---
 
 # Batch Python File Processing with ffmpeg
