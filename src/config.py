@@ -1,15 +1,15 @@
-#-------------------------------------------------------------------------
-# 
-# THIS CODE AND INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, 
-# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES 
+# -------------------------------------------------------------------------
+#
+# THIS CODE AND INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES
 # OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
-#----------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------
 # The example companies, organizations, products, domain names,
 # e-mail addresses, logos, people, places, and events depicted
 # herein are fictitious. No association with any real company,
 # organization, product, domain name, email address, logo, person,
 # places, or events is intended or should be inferred.
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 
 # Global constant variables (Azure Storage account/Batch details)
 
@@ -19,7 +19,7 @@
 # unique to your accounts. These are used when constructing connection strings
 # for the Batch and Storage client objects.
 
-_BATCH_ACCOUNT_NAME =''
+_BATCH_ACCOUNT_NAME = ''
 _BATCH_ACCOUNT_KEY = ''
 _BATCH_ACCOUNT_URL = ''
 _STORAGE_ACCOUNT_NAME = ''
